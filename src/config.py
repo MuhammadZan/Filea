@@ -8,15 +8,10 @@ DEBUG = True
 HOST = os.getenv('HOST')
 PORT = int(os.getenv('PORT', '5000'))
 
-MONGODB = {
-    'host': os.getenv('MONGODB_HOST', os.getenv('DB_PORT_27017_TCP_ADDR', 'localhost')),
-    'port': os.getenv('MONGODB_PORT', os.getenv('DB_PORT_27017_TCP_PORT', '27017')),
-    'db': os.getenv('MONGODB_DB', 'filea'),
-}
+# MongoDB connection using URI string (supports credentials)
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/filea')
 MONGODB_SETTINGS = {
-    'host': MONGODB['host'],
-    'port': int(MONGODB['port']),
-    'db': MONGODB['db'],
+    'host': MONGO_URI,
 }
 
 logging.basicConfig(
