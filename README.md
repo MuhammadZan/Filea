@@ -1,55 +1,131 @@
-# This repo is deprecated, please use https://github.com/antkahn/flask-api-starter-kit instead
+# File Conversion API
 
-Installation
-------------
+A Flask-based REST API for converting files between different formats without using paid services.
 
-```
-git clone git@github.com:theodo/flask-boilerplate.git && cd flask-boilerplate
-docker-compose run --rm server pip install -r requirements.txt --user --upgrade
-docker-compose up -d server
-```
+## Features
 
-Accessing containers
---------------------
+✅ **Image Conversion** - PNG, JPG, WEBP, BMP, GIF, AVIF  
+🚧 **Document Conversion** - PDF ↔ Word (Coming in Phase 2)  
+🚧 **Spreadsheet Conversion** - Excel → PDF (Coming in Phase 3)
 
-Require Docker >= 1.3
+## Quick Start
 
-```shell
-# use 'docker ps' to see the list of your containers
-docker exec -it flaskboilerplate_db_1 psql -Upostgres
-docker exec -it flaskboilerplate_server_1 bash
-```
+### 1. Setup Environment
 
-Migration process
------------------
+```bash
+# Activate virtual environment
+source venv/bin/activate
 
-```shell
-# Prior to the first migration
-docker-compose run --rm server python src/manage.py db init
-
-# Create a new version of the database
-docker-compose run --rm server python src/manage.py db migrate
-# check file + remove comment + improve file if needed
-sudo vim migration/versions/<migration_id>.py
-
-# Upgrade your database to the last version
-docker-compose run --rm server python src/manage.py db upgrade
+# Install dependencies (if not already installed)
+pip install -r requirements.txt
 ```
 
-Run tests
----------
+### 2. Start Server
 
-```shell
-docker-compose run --rm server python -m unittest
+```bash
+# Set environment variables and start
+HOST=localhost PORT=5001 python src/server.py
 ```
 
-Commands
---------
+> **Note**: Port 5000 is blocked by macOS AirPlay. Use port 5001 or configure in `.env`
 
-```shell
-# Screenshot of python vendors
-docker-compose run --rm server pip freeze > requirements.txt
+### 3. Test API
 
-# Run a command in the server container:
-docker-compose run --rm server <command>
+```bash
+# Health check
+curl http://localhost:5001/api/health
+
+# List supported formats
+curl http://localhost:5001/api/formats
 ```
+
+## API Endpoints
+
+### Image Conversion
+
+Convert images between formats:
+
+```bash
+POST /api/convert/image
+```
+
+**Parameters:**
+- `file` - Image file (multipart/form-data)
+- `to_format` - Target format: `png`, `jpg`, `webp`, `avif`, `bmp`, `gif`
+
+**Example:**
+
+```bash
+# Convert PNG to WEBP
+curl -X POST \
+  -F "file=@photo.png" \
+  -F "to_format=webp" \
+  http://localhost:5001/api/convert/image \
+  -o photo.webp
+
+# Convert JPG to AVIF
+curl -X POST \
+  -F "file=@image.jpg" \
+  -F "to_format=avif" \
+  http://localhost:5001/api/convert/image \
+  -o image.avif
+```
+
+### Utility Endpoints
+
+**Health Check:**
+```bash
+GET /api/health
+```
+
+**Supported Formats:**
+```bash
+GET /api/formats
+```
+
+**List Routes:**
+```bash
+GET /routes
+```
+
+## Configuration
+
+Edit `.env` file:
+
+```bash
+HOST=localhost
+PORT=5001
+MAX_FILE_SIZE=10485760  # 10MB in bytes
+```
+
+## Project Structure
+
+```
+filea/
+├── src/
+│   ├── converters/         # Conversion logic
+│   ├── route/             # API endpoints
+│   ├── util/              # File handling utilities
+│   └── server.py          # Main application
+├── uploads/               # Temporary uploads
+├── outputs/               # Converted files
+└── requirements.txt       # Dependencies
+```
+
+## Development Roadmap
+
+- [x] **Phase 1**: Image conversion (PNG, JPG, WEBP, AVIF, BMP, GIF)
+- [ ] **Phase 2**: PDF ↔ Word conversion
+- [ ] **Phase 3**: Excel → PDF conversion
+- [ ] **Phase 4**: File cleanup & optimization
+
+## Libraries Used
+
+- **Flask** - Web framework
+- **Pillow** - Image processing
+- **pillow-avif-plugin** - AVIF support
+- **pdf2docx** - PDF to Word
+- **python-docx** - Word documents
+- **reportlab** - PDF generation
+- **openpyxl** - Excel files
+

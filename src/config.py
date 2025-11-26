@@ -9,10 +9,15 @@ HOST = os.getenv('HOST')
 PORT = int(os.getenv('PORT', '5000'))
 
 # MongoDB connection using URI string (supports credentials)
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/filea')
-MONGODB_SETTINGS = {
-    'host': MONGO_URI,
-}
+# Set to None to disable MongoDB (file conversion doesn't require database)
+MONGO_URI = os.getenv('MONGO_URI', None)
+if MONGO_URI:
+    MONGODB_SETTINGS = {
+        'host': MONGO_URI,
+    }
+
+# File upload settings
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 10 * 1024 * 1024))  # 10MB default
 
 logging.basicConfig(
     filename=os.getenv('SERVICE_LOG', 'server.log'),
