@@ -19,9 +19,12 @@ if MONGO_URI:
 # File upload settings
 MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 10 * 1024 * 1024))  # 10MB default
 
+# Logging configuration - output to console
 logging.basicConfig(
-    filename=os.getenv('SERVICE_LOG', 'server.log'),
-    level=logging.DEBUG,
+    level=logging.DEBUG if DEBUG else logging.INFO,
     format='%(levelname)s: %(asctime)s pid:%(process)s module:%(module)s %(message)s',
     datefmt='%d/%m/%y %H:%M:%S',
+    handlers=[
+        logging.StreamHandler()  # Output to console instead of file
+    ]
 )
