@@ -20,7 +20,8 @@ Werkzeug==0.10.1
 # File Conversion Libraries
 Pillow==10.1.0
 pillow-avif-plugin==1.4.0
-pdf2docx==0.5.6
+PyMuPDF==1.23.26
+pdf2docx==0.5.8
 python-docx==1.1.0
 reportlab==4.0.7
 openpyxl==3.1.2

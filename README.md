@@ -5,7 +5,7 @@ A Flask-based REST API for converting files between different formats without us
 ## Features
 
 ✅ **Image Conversion** - PNG, JPG, WEBP, BMP, GIF, AVIF  
-🚧 **Document Conversion** - PDF ↔ Word (Coming in Phase 2)  
+✅ **Document Conversion** - PDF ↔ Word  
 🚧 **Spreadsheet Conversion** - Excel → PDF (Coming in Phase 3)
 
 ## Quick Start
@@ -71,6 +71,46 @@ curl -X POST \
   -o image.avif
 ```
 
+### PDF to Word Conversion
+
+Convert PDF documents to editable Word files:
+
+```bash
+POST /api/convert/pdf-to-word
+```
+
+**Parameters:**
+- `file` - PDF file (multipart/form-data)
+
+**Example:**
+
+```bash
+curl -X POST \
+  -F "file=@document.pdf" \
+  http://localhost:5001/api/convert/pdf-to-word \
+  -o document.docx
+```
+
+### Word to PDF Conversion
+
+Convert Word documents to PDF format:
+
+```bash
+POST /api/convert/word-to-pdf
+```
+
+**Parameters:**
+- `file` - Word file (multipart/form-data)
+
+**Example:**
+
+```bash
+curl -X POST \
+  -F "file=@document.docx" \
+  http://localhost:5001/api/convert/word-to-pdf \
+  -o document.pdf
+```
+
 ### Utility Endpoints
 
 **Health Check:**
@@ -115,7 +155,7 @@ filea/
 ## Development Roadmap
 
 - [x] **Phase 1**: Image conversion (PNG, JPG, WEBP, AVIF, BMP, GIF)
-- [ ] **Phase 2**: PDF ↔ Word conversion
+- [x] **Phase 2**: PDF ↔ Word conversion
 - [ ] **Phase 3**: Excel → PDF conversion
 - [ ] **Phase 4**: File cleanup & optimization
 

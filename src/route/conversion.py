@@ -92,9 +92,133 @@ class SupportedFormatsAPI(Resource):
         """Get list of supported formats by category"""
         return {
             'images': ImageConverter.SUPPORTED_FORMATS,
-            'documents': ['pdf', 'docx'],  # Will be implemented in Phase 2
+            'documents': ['pdf', 'docx'],
             'spreadsheets': ['xlsx', 'xls']  # Will be implemented in Phase 3
         }
+
+
+class PDFToWordAPI(Resource):
+    """Convert PDF to Word"""
+    
+    def post(self):
+        """
+        Convert PDF to Word document
+        
+        Request:
+            - file: PDF file (multipart/form-data)
+        
+        Returns:
+            Converted Word document
+        """
+        try:
+            from converters.pdf_converter import DocumentConverter
+            
+            # Check if file is present
+            if 'file' not in request.files:
+                return {'error': 'No file provided'}, 400
+            
+            file = request.files['file']
+            
+            # Save uploaded file
+            input_path, original_filename, input_ext = FileHandler.save_upload(
+                file, 
+                ['pdf']
+            )
+            
+            # Generate output path
+            output_path = FileHandler.get_output_path(original_filename, 'docx')
+            
+            try:
+                # Convert PDF to Word
+                DocumentConverter.pdf_to_word(input_path, output_path)
+                
+                # Send the converted file
+                response = send_file(
+                    output_path,
+                    as_attachment=True,
+                    attachment_filename=f"{os.path.splitext(original_filename)[0]}.docx"
+                )
+                
+                # Clean up files after sending
+                @response.call_on_close
+                def cleanup():
+                    FileHandler.cleanup_file(input_path)
+                    FileHandler.cleanup_file(output_path)
+                
+                return response
+                
+            except Exception as e:
+                # Clean up on error
+                FileHandler.cleanup_file(input_path)
+                FileHandler.cleanup_file(output_path)
+                raise e
+                
+        except ValueError as e:
+            return {'error': str(e)}, 400
+        except Exception as e:
+            return {'error': f'Conversion failed: {str(e)}'}, 500
+
+
+class WordToPDFAPI(Resource):
+    """Convert Word to PDF"""
+    
+    def post(self):
+        """
+        Convert Word document to PDF
+        
+        Request:
+            - file: Word file (multipart/form-data)
+        
+        Returns:
+            Converted PDF document
+        """
+        try:
+            from converters.pdf_converter import DocumentConverter
+            
+            # Check if file is present
+            if 'file' not in request.files:
+                return {'error': 'No file provided'}, 400
+            
+            file = request.files['file']
+            
+            # Save uploaded file
+            input_path, original_filename, input_ext = FileHandler.save_upload(
+                file, 
+                ['docx', 'doc']
+            )
+            
+            # Generate output path
+            output_path = FileHandler.get_output_path(original_filename, 'pdf')
+            
+            try:
+                # Convert Word to PDF
+                DocumentConverter.word_to_pdf(input_path, output_path)
+                
+                # Send the converted file
+                response = send_file(
+                    output_path,
+                    as_attachment=True,
+                    attachment_filename=f"{os.path.splitext(original_filename)[0]}.pdf"
+                )
+                
+                # Clean up files after sending
+                @response.call_on_close
+                def cleanup():
+                    FileHandler.cleanup_file(input_path)
+                    FileHandler.cleanup_file(output_path)
+                
+                return response
+                
+            except Exception as e:
+                # Clean up on error
+                FileHandler.cleanup_file(input_path)
+                FileHandler.cleanup_file(output_path)
+                raise e
+                
+        except ValueError as e:
+            return {'error': str(e)}, 400
+        except Exception as e:
+            return {'error': f'Conversion failed: {str(e)}'}, 500
 
 
 class HealthCheckAPI(Resource):
@@ -111,5 +235,7 @@ class HealthCheckAPI(Resource):
 
 # Register endpoints
 conversion_blueprint_api.add_resource(ImageConversionAPI, '/convert/image')
+conversion_blueprint_api.add_resource(PDFToWordAPI, '/convert/pdf-to-word')
+conversion_blueprint_api.add_resource(WordToPDFAPI, '/convert/word-to-pdf')
 conversion_blueprint_api.add_resource(SupportedFormatsAPI, '/formats')
 conversion_blueprint_api.add_resource(HealthCheckAPI, '/health')
