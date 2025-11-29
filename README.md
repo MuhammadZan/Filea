@@ -6,7 +6,8 @@ A Flask-based REST API for converting files between different formats without us
 
 ✅ **Image Conversion** - PNG, JPG, WEBP, BMP, GIF, AVIF  
 ✅ **Document Conversion** - PDF ↔ Word  
-🚧 **Spreadsheet Conversion** - Excel → PDF (Coming in Phase 3)
+✅ **Spreadsheet Conversion** - PDF ↔ Excel  
+🚧 **PDF Image Conversion** - PDF ↔ Images (Coming in Phase 4)
 
 ## Quick Start
 
@@ -111,6 +112,46 @@ curl -X POST \
   -o document.pdf
 ```
 
+### PDF to Excel Conversion
+
+Convert PDF documents with tables to Excel spreadsheets:
+
+```bash
+POST /api/convert/pdf-to-excel
+```
+
+**Parameters:**
+- `file` - PDF file (multipart/form-data)
+
+**Example:**
+
+```bash
+curl -X POST \
+  -F "file=@data.pdf" \
+  http://localhost:5001/api/convert/pdf-to-excel \
+  -o data.xlsx
+```
+
+### Excel to PDF Conversion
+
+Convert Excel spreadsheets to PDF format:
+
+```bash
+POST /api/convert/excel-to-pdf
+```
+
+**Parameters:**
+- `file` - Excel file (multipart/form-data)
+
+**Example:**
+
+```bash
+curl -X POST \
+  -F "file=@spreadsheet.xlsx" \
+  http://localhost:5001/api/convert/excel-to-pdf \
+  -o spreadsheet.pdf
+```
+
 ### Utility Endpoints
 
 **Health Check:**
@@ -156,8 +197,9 @@ filea/
 
 - [x] **Phase 1**: Image conversion (PNG, JPG, WEBP, AVIF, BMP, GIF)
 - [x] **Phase 2**: PDF ↔ Word conversion
-- [ ] **Phase 3**: Excel → PDF conversion
-- [ ] **Phase 4**: File cleanup & optimization
+- [x] **Phase 3**: PDF ↔ Excel conversion
+- [ ] **Phase 4**: PDF ↔ Image conversion
+- [ ] **Phase 5**: File cleanup & optimization
 
 ## Libraries Used
 
@@ -168,4 +210,6 @@ filea/
 - **python-docx** - Word documents
 - **reportlab** - PDF generation
 - **openpyxl** - Excel files
+- **tabula-py** - PDF table extraction
+- **pandas** - Data manipulation
 

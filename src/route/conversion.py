@@ -93,7 +93,7 @@ class SupportedFormatsAPI(Resource):
         return {
             'images': ImageConverter.SUPPORTED_FORMATS,
             'documents': ['pdf', 'docx'],
-            'spreadsheets': ['xlsx', 'xls']  # Will be implemented in Phase 3
+            'spreadsheets': ['xlsx', 'xls', 'pdf']  # Excel and PDF
         }
 
 
@@ -221,6 +221,130 @@ class WordToPDFAPI(Resource):
             return {'error': f'Conversion failed: {str(e)}'}, 500
 
 
+class PDFToExcelAPI(Resource):
+    """Convert PDF to Excel"""
+    
+    def post(self):
+        """
+        Convert PDF to Excel spreadsheet
+        
+        Request:
+            - file: PDF file (multipart/form-data)
+        
+        Returns:
+            Converted Excel file (.xlsx)
+        """
+        try:
+            from converters.excel_converter import ExcelConverter
+            
+            # Check if file is present
+            if 'file' not in request.files:
+                return {'error': 'No file provided'}, 400
+            
+            file = request.files['file']
+            
+            # Save uploaded file
+            input_path, original_filename, input_ext = FileHandler.save_upload(
+                file, 
+                ['pdf']
+            )
+            
+            # Generate output path
+            output_path = FileHandler.get_output_path(original_filename, 'xlsx')
+            
+            try:
+                # Convert PDF to Excel
+                ExcelConverter.pdf_to_excel(input_path, output_path)
+                
+                # Send the converted file
+                response = send_file(
+                    output_path,
+                    as_attachment=True,
+                    attachment_filename=f"{os.path.splitext(original_filename)[0]}.xlsx"
+                )
+                
+                # Clean up files after sending
+                @response.call_on_close
+                def cleanup():
+                    FileHandler.cleanup_file(input_path)
+                    FileHandler.cleanup_file(output_path)
+                
+                return response
+                
+            except Exception as e:
+                # Clean up on error
+                FileHandler.cleanup_file(input_path)
+                FileHandler.cleanup_file(output_path)
+                raise e
+                
+        except ValueError as e:
+            return {'error': str(e)}, 400
+        except Exception as e:
+            return {'error': f'Conversion failed: {str(e)}'}, 500
+
+
+class ExcelToPDFAPI(Resource):
+    """Convert Excel to PDF"""
+    
+    def post(self):
+        """
+        Convert Excel spreadsheet to PDF
+        
+        Request:
+            - file: Excel file (multipart/form-data)
+        
+        Returns:
+            Converted PDF document
+        """
+        try:
+            from converters.excel_converter import ExcelConverter
+            
+            # Check if file is present
+            if 'file' not in request.files:
+                return {'error': 'No file provided'}, 400
+            
+            file = request.files['file']
+            
+            # Save uploaded file
+            input_path, original_filename, input_ext = FileHandler.save_upload(
+                file, 
+                ['xlsx', 'xls']
+            )
+            
+            # Generate output path
+            output_path = FileHandler.get_output_path(original_filename, 'pdf')
+            
+            try:
+                # Convert Excel to PDF
+                ExcelConverter.excel_to_pdf(input_path, output_path)
+                
+                # Send the converted file
+                response = send_file(
+                    output_path,
+                    as_attachment=True,
+                    attachment_filename=f"{os.path.splitext(original_filename)[0]}.pdf"
+                )
+                
+                # Clean up files after sending
+                @response.call_on_close
+                def cleanup():
+                    FileHandler.cleanup_file(input_path)
+                    FileHandler.cleanup_file(output_path)
+                
+                return response
+                
+            except Exception as e:
+                # Clean up on error
+                FileHandler.cleanup_file(input_path)
+                FileHandler.cleanup_file(output_path)
+                raise e
+                
+        except ValueError as e:
+            return {'error': str(e)}, 400
+        except Exception as e:
+            return {'error': f'Conversion failed: {str(e)}'}, 500
+
+
 class HealthCheckAPI(Resource):
     """Health check endpoint"""
     
@@ -233,9 +357,12 @@ class HealthCheckAPI(Resource):
         }
 
 
+
 # Register endpoints
 conversion_blueprint_api.add_resource(ImageConversionAPI, '/convert/image')
 conversion_blueprint_api.add_resource(PDFToWordAPI, '/convert/pdf-to-word')
 conversion_blueprint_api.add_resource(WordToPDFAPI, '/convert/word-to-pdf')
+conversion_blueprint_api.add_resource(PDFToExcelAPI, '/convert/pdf-to-excel')
+conversion_blueprint_api.add_resource(ExcelToPDFAPI, '/convert/excel-to-pdf')
 conversion_blueprint_api.add_resource(SupportedFormatsAPI, '/formats')
 conversion_blueprint_api.add_resource(HealthCheckAPI, '/health')
