@@ -12,7 +12,7 @@ class FileHandler:
     PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'uploads')
     OUTPUT_FOLDER = os.path.join(PROJECT_ROOT, 'outputs')
-    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+    MAX_FILE_SIZE = 100 * 1024 * 1024  # 10MB
     
     @staticmethod
     def allowed_file(filename, allowed_extensions):

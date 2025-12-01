@@ -17,7 +17,7 @@ if MONGO_URI:
     }
 
 # File upload settings
-MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 10 * 1024 * 1024))  # 10MB default
+MAX_FILE_SIZE = int(os.getenv('MAX_FILE_SIZE', 100 * 1024 * 1024))  # 10MB default
 
 # Logging configuration - output to console
 logging.basicConfig(
